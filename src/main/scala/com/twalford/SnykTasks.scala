@@ -1,7 +1,7 @@
 package com.twalford
 
 import sbt.ConcurrentRestrictions.Tag
-import sbt.{Def, settingKey, taskKey}
+import sbt.{Def, settingKey, taskKey, UnprintableException}
 import sbt.Keys.{name, streams}
 import sbt.internal.util.ManagedLogger
 
@@ -17,16 +17,24 @@ object SnykTasks {
 
   val snykTag = Tag("snyk-exclusive")
 
+  private val windowsDelimiter = """"\\""""
+  private val linuxDelimiter = "\""
+  private def delimiter = if (sys.props("os.name").contains("Windows")) {
+    windowsDelimiter
+  } else {
+    linuxDelimiter
+  }
+
 
   lazy val snykTestTask = Def.task {
     val log = streams.value.log
-    run(s"""snyk test -- "\\"project ${name.value}\\""""", log)
+    run(List("snyk", "test", "--", s"""${delimiter}project ${name.value}${delimiter}"""), log)
   }.tag(snykTag)
 
   lazy val snykMonitorTask = Def.task {
     val log = streams.value.log
     val projectName = name.value
-    run(s"""snyk monitor --org=${snykOrganization.value} --project-name=$projectName -- "\\"project $projectName\\""""", log)
+    run(List("snyk", "monitor", s"--org=${snykOrganization.value}", s"--project-name=$projectName", "--", s"""${delimiter}project $projectName${delimiter}"""), log)
   }.tag(snykTag)
 
   lazy val snykAuthTask = Def.task {
@@ -38,19 +46,24 @@ object SnykTasks {
     Option(System.getenv(authEnvVar)) match {
       case None =>
         log.info("No auth set up, but presumed we're running locally. Requesting auth via `snyk auth`")
-        run("snyk auth", log)
+        run(List("snyk", "auth"), log)
       case Some(auth) =>
         log.debug("Snyk using environment variable authorization, continuing")
-        run(s"snyk auth $auth", log)
+        run(List("snyk", "auth", auth), log)
     }
   }
 
-  private def run(cmd: String, log: ManagedLogger): Unit = {
+  private def run(cmds: List[String], log: ManagedLogger): Unit = {
     val shell = if (sys.props("os.name").contains("Windows")) {
       List("cmd", "/c")
     } else {
-      List("bash", "-c")
+      Nil
     }
-    Process(shell ::: cmd.split(' ').toList) ! log
+    val responseCode = Process(shell ::: cmds) ! log
+    if (responseCode != 0) {
+      throw SnykError
+    }
   }
+
+  object SnykError extends Error("Snyk process failed") with UnprintableException
 }
