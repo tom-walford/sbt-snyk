@@ -15,7 +15,8 @@ object SnykPlugin extends AutoPlugin {
 
   override def globalSettings: Seq[Def.Setting[_]] = Seq(
     Global / concurrentRestrictions += Tags.exclusive(snykTag),
-    aggregate in snykAuth := false
+    aggregate in snykAuth := false,
+    snykAuth := snykAuthTask.value
   )
 
   override lazy val projectSettings: Seq[Setting[_]] = Seq(

@@ -17,24 +17,22 @@ object SnykTasks {
 
   val snykTag = Tag("snyk-exclusive")
 
-  private val windowsDelimiter = """"\\""""
-  private val linuxDelimiter = "\""
-  private def delimiter = if (sys.props("os.name").contains("Windows")) {
-    windowsDelimiter
+  private def escape(str: String) = if (sys.props("os.name").contains("Windows")) {
+    s""""\\"$str\\"""""
   } else {
-    linuxDelimiter
+    s""""$str""""
   }
-
 
   lazy val snykTestTask = Def.task {
     val log = streams.value.log
-    run(List("snyk", "test", "--", s"""${delimiter}project ${name.value}${delimiter}"""), log)
+    run(List("snyk", "test", "--", escape(s"project ${name.value}")), log)
   }.tag(snykTag)
 
   lazy val snykMonitorTask = Def.task {
     val log = streams.value.log
     val projectName = name.value
-    run(List("snyk", "monitor", s"--org=${snykOrganization.value}", s"--project-name=$projectName", "--", s"""${delimiter}project $projectName${delimiter}"""), log)
+    run(List("snyk", "monitor", s"--org=${snykOrganization.value}", s"--project-name=$projectName", "--",
+     escape(s"project $projectName")), log)
   }.tag(snykTag)
 
   lazy val snykAuthTask = Def.task {
