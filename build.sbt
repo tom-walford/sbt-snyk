@@ -1,5 +1,5 @@
 name := "sbt-snyk"
-organization := "org.tom.walford"
+organization := "com.twalford"
 version := "0.1-SNAPSHOT"
 
 scalaVersion := "2.12.8"
