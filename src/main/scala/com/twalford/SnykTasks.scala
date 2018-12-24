@@ -25,14 +25,16 @@ object SnykTasks {
 
   lazy val snykTestTask = Def.task {
     val log = streams.value.log
-    run(List("snyk", "test", "--", escape(s"project ${name.value}")), log)
+    val id = thisProject.value.id
+    run(List("snyk", "test", "--", escape(s"project $id")), log)
   }.tag(snykTag)
 
   lazy val snykMonitorTask = Def.task {
+    val id = thisProject.value.id
     val log = streams.value.log
     val projectName = name.value
     run(List("snyk", "monitor", s"--org=${snykOrganization.value}", s"--project-name=$projectName", "--",
-     escape(s"project $projectName")), log)
+     escape(s"project $id")), log)
   }.tag(snykTag)
 
   lazy val snykAuthTask = Def.task {
