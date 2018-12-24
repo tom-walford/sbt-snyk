@@ -2,7 +2,7 @@ package com.twalford
 
 import sbt.ConcurrentRestrictions.Tag
 import sbt.{Def, settingKey, taskKey, UnprintableException}
-import sbt.Keys.{name, streams}
+import sbt.Keys.{name, streams, thisProject}
 import sbt.internal.util.ManagedLogger
 
 import scala.sys.process.Process
