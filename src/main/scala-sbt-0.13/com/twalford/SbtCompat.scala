@@ -1,5 +1,7 @@
 package com.twalford
 
+import sbt.Logger
+
 object SbtCompat {
   private def sbtProcessLoggerLtoSSPProcessLogger(l: sbt.ProcessLogger): scala.sys.process.ProcessLogger = {
     new scala.sys.process.ProcessLogger {
@@ -9,6 +11,6 @@ object SbtCompat {
     }
   }
 
-  def convert(log: sbt.Logger): scala.sys.process.ProcessLogger =
-    sbtProcessLoggerLtoSSPProcessLogger(sbt.Logger.log2PLog(log))
+  def convert(log: Logger): scala.sys.process.ProcessLogger =
+    sbtProcessLoggerLtoSSPProcessLogger(Logger.log2PLog(log))
 }

@@ -4,7 +4,7 @@ import com.twalford.SbtCompat._
 import sbt.ConcurrentRestrictions.Tag
 import sbt.{Def, settingKey, taskKey, UnprintableException}
 import sbt.Keys.{name, streams, thisProject}
-import sbt.util.Logger
+import sbt.Logger
 
 import scala.sys.process.Process
 
