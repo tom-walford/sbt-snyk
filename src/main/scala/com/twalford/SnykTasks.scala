@@ -12,8 +12,8 @@ object SnykTasks {
   private lazy val authEnvVar = "SNYK_TOKEN"
 
   val snykBinary = settingKey[String]("The snyk command to run. Defaults to 'snyk' for the case when snyk is on the $PATH; alternatively e.g. './node_modules/.bin/snyk'")
-  val snykOrganization = settingKey[String]("The snyk organization to report against (i.e. synk --org)")
-  val snykProject = settingKey[String]("The snyk project to report against (i.e. snyk --project).  Ideally the appId, but it must be unique.  Defaults to sbt project name.")
+  val snykOrganization = settingKey[String]("The snyk organization to report against (i.e. `synk --org`)")
+  val snykProject = settingKey[String]("The snyk project to report against (i.e. `snyk --project-name`).  Ideally the appId, but it must be unique.  Defaults to sbt project name.")
 
   val snykAuth = taskKey[Unit]("Authorizes a local snyk instance")
   val snykTest = taskKey[Unit]("Runs snyk test on the local project")
@@ -42,13 +42,14 @@ object SnykTasks {
 
   lazy val snykAuthTask = Def.task {
     val log = streams.value.log
+    val cmd = List(snykBinary.value, "auth")
     sys.env.get(authEnvVar) match {
       case None =>
-        log.info("No auth set up, but presumed we're running locally. Requesting auth via `snyk auth`")
-        run(List(snykBinary.value, "auth"), log)
+        log.info(s"No auth set up, but presumed we're running locally. Requesting auth via `${cmd.mkString(" ")}`")
+        run(cmd, log)
       case Some(auth) =>
         log.debug("Snyk using environment variable authorization, continuing")
-        run(List(snykBinary.value, "auth", auth), log)
+        run(cmd :+ auth, log)
     }
   }.tag(snykTag)
 
