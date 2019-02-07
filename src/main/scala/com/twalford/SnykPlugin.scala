@@ -14,7 +14,7 @@ object SnykPlugin extends AutoPlugin {
   }
 
   override def globalSettings: Seq[Def.Setting[_]] = Seq(
-    Global / concurrentRestrictions += Tags.exclusive(snykTag),
+    (concurrentRestrictions in Global) += Tags.exclusive(snykTag),
     aggregate in snykAuth := false,
     snykAuth := snykAuthTask.value
   )
