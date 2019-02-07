@@ -1,8 +1,10 @@
 name := "sbt-snyk"
 organization := "com.github.tom-walford"
-version := "0.2.0"
+version := "0.2.1-PR-SNAPSHOT"
 
 scalaVersion := "2.12.8"
+
+crossSbtVersions := Seq("1.2.8", "0.13.17")
 
 enablePlugins(SbtPlugin)
 
