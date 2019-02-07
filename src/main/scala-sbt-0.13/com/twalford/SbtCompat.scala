@@ -5,7 +5,8 @@ import sbt.Logger
 object SbtCompat {
 
   def convert(log: Logger): scala.sys.process.ProcessLogger = {
-    val l: sbt.ProcessLogger = Logger.log2PLog(log)
+    // even in sbt 0.13 there is a built in implicit conversion for this part, but then a further conversion is necessary
+    val l: sbt.ProcessLogger = log
 
     new scala.sys.process.ProcessLogger {
       def out(s: => String): Unit = l.info(s)
