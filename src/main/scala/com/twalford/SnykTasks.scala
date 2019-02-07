@@ -30,7 +30,7 @@ object SnykTasks {
   lazy val snykTestTask = Def.task {
     val log = streams.value.log
     val id = thisProject.value.id
-    run(List(snykBinary.value, "test", "--", escape(s"project $id")), log)
+    run(List(snykBinary.value, "test", s"--org=${snykOrganization.value}", s"--project-name=${snykProject.value}", "--", escape(s"project $id")), log)
   }.tag(snykTag)
 
   lazy val snykMonitorTask = Def.task {
@@ -42,7 +42,7 @@ object SnykTasks {
 
   lazy val snykAuthTask = Def.task {
     val log = streams.value.log
-    val cmd = List(snykBinary.value, "auth")
+    val cmd = List(snykBinary.value, "auth", s"--org=${snykOrganization.value}")
     sys.env.get(authEnvVar) match {
       case None =>
         log.info(s"No auth set up, but presumed we're running locally. Requesting auth via `${cmd.mkString(" ")}`")
@@ -59,6 +59,7 @@ object SnykTasks {
     } else {
       Nil
     }
+    log.info(s"Running `${(shell ::: cmds).mkString(" ")}`")
     val responseCode = Process(shell ::: cmds) ! convert(log)
     if (responseCode != 0) {
       throw SnykError
