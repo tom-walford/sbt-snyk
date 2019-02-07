@@ -11,7 +11,10 @@ import scala.sys.process.Process
 object SnykTasks {
   private lazy val authEnvVar = "SNYK_TOKEN"
 
-  val snykOrganization = settingKey[String]("The organization snyk should be run for")
+  val snykBinary = settingKey[String]("The snyk command to run. Defaults to 'snyk' for the case when snyk is on the $PATH; alternatively e.g. './node_modules/.bin/snyk'")
+  val snykOrganization = settingKey[String]("The snyk organization to report against (i.e. synk --org)")
+  val snykProject = settingKey[String]("The snyk project to report against (i.e. snyk --project).  Ideally the appId, but it must be unique.  Defaults to sbt project name.")
+
   val snykAuth = taskKey[Unit]("Authorizes a local snyk instance")
   val snykTest = taskKey[Unit]("Runs snyk test on the local project")
   val snykMonitor = taskKey[Unit]("Runs snyk monitor on the local project")
@@ -27,32 +30,27 @@ object SnykTasks {
   lazy val snykTestTask = Def.task {
     val log = streams.value.log
     val id = thisProject.value.id
-    run(List("snyk", "test", "--", escape(s"project $id")), log)
+    run(List(snykBinary.value, "test", "--", escape(s"project $id")), log)
   }.tag(snykTag)
 
   lazy val snykMonitorTask = Def.task {
     val id = thisProject.value.id
     val log = streams.value.log
-    val projectName = name.value
-    run(List("snyk", "monitor", s"--org=${snykOrganization.value}", s"--project-name=$projectName", "--",
+    run(List(snykBinary.value, "monitor", s"--org=${snykOrganization.value}", s"--project-name=${snykProject.value}", "--",
      escape(s"project $id")), log)
   }.tag(snykTag)
 
   lazy val snykAuthTask = Def.task {
     val log = streams.value.log
-    checkForAuth(log)
-  }.tag(snykTag)
-
-  private def checkForAuth(log: Logger): Unit = {
-    Option(System.getenv(authEnvVar)) match {
+    sys.env.get(authEnvVar) match {
       case None =>
         log.info("No auth set up, but presumed we're running locally. Requesting auth via `snyk auth`")
-        run(List("snyk", "auth"), log)
+        run(List(snykBinary.value, "auth"), log)
       case Some(auth) =>
         log.debug("Snyk using environment variable authorization, continuing")
-        run(List("snyk", "auth", auth), log)
+        run(List(snykBinary.value, "auth", auth), log)
     }
-  }
+  }.tag(snykTag)
 
   private def run(cmds: List[String], log: Logger): Unit = {
     val shell = if (sys.props("os.name").contains("Windows")) {

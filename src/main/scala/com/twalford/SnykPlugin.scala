@@ -10,7 +10,9 @@ object SnykPlugin extends AutoPlugin {
   override def requires = DependencyGraphPlugin
   object autoImport {
     val SnykPlugin: AutoPlugin = self
+    val snykBinary = SnykTasks.snykBinary
     val snykOrganization = SnykTasks.snykOrganization
+    val snykProject = SnykTasks.snykProject
   }
 
   override def globalSettings: Seq[Def.Setting[_]] = Seq(
@@ -22,6 +24,9 @@ object SnykPlugin extends AutoPlugin {
   override lazy val projectSettings: Seq[Setting[_]] = Seq(
     snykTest := snykTestTask.value,
     snykMonitor := snykMonitorTask.value,
-    snykAuth := snykAuthTask.value
+    snykAuth := snykAuthTask.value,
+
+    snykBinary := "snyk",
+    snykProject := name.value
   )
 }
