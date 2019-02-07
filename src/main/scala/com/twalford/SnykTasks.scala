@@ -1,9 +1,10 @@
 package com.twalford
 
+import com.twalford.SbtCompat._
 import sbt.ConcurrentRestrictions.Tag
 import sbt.{Def, settingKey, taskKey, UnprintableException}
 import sbt.Keys.{name, streams, thisProject}
-import sbt.internal.util.ManagedLogger
+import sbt.util.Logger
 
 import scala.sys.process.Process
 
@@ -42,7 +43,7 @@ object SnykTasks {
     checkForAuth(log)
   }.tag(snykTag)
 
-  private def checkForAuth(log: ManagedLogger): Unit = {
+  private def checkForAuth(log: Logger): Unit = {
     Option(System.getenv(authEnvVar)) match {
       case None =>
         log.info("No auth set up, but presumed we're running locally. Requesting auth via `snyk auth`")
@@ -53,13 +54,13 @@ object SnykTasks {
     }
   }
 
-  private def run(cmds: List[String], log: ManagedLogger): Unit = {
+  private def run(cmds: List[String], log: Logger): Unit = {
     val shell = if (sys.props("os.name").contains("Windows")) {
       List("cmd", "/c")
     } else {
       Nil
     }
-    val responseCode = Process(shell ::: cmds) ! log
+    val responseCode = Process(shell ::: cmds) ! convert(log)
     if (responseCode != 0) {
       throw SnykError
     }

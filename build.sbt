@@ -4,6 +4,8 @@ version := "0.2.0"
 
 scalaVersion := "2.12.8"
 
+crossSbtVersions := Seq("1.2.8", "0.13.17")
+
 enablePlugins(SbtPlugin)
 
 addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.9.2")
