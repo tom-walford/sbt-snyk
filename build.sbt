@@ -1,6 +1,6 @@
 name := "sbt-snyk"
 organization := "com.github.tom-walford"
-version := "0.2.1-PR-SNAPSHOT"
+version := "0.3.2"
 
 scalaVersion := "2.12.8"
 

@@ -27,7 +27,7 @@ object SnykPlugin extends AutoPlugin {
     snykTest := snykTestTask.value,
     snykMonitor := snykMonitorTask.value,
     snykAuth := snykAuthTask.value,
-
-    snykProject := name.value
+    snykProject := name.value,
+    snykOrganization := (snykOrganization in Global).value
   )
 }
